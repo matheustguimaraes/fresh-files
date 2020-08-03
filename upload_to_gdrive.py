@@ -1,8 +1,10 @@
+import datetime
 import os
 import sys
 import time
 from pathlib import Path
 
+from dateutil.relativedelta import relativedelta
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
@@ -39,12 +41,10 @@ pathDirSource = sys.argv[1]  # 'sourceDir'
 extension_files = sys.argv[2]  # 'mp4'
 id_drive = sys.argv[3]  # 12lp12l4p125k12o215k
 
-now = time.time()
+now = datetime.date.today()
+two_m_ago = now - relativedelta(months=2)
 
-day2seconds = 86400
-two_months = 60
-
-time_limit = now - (two_months * day2seconds)
+time_limit = time.mktime(two_m_ago.timetuple())
 
 # pathFull = pathDirSource+'/'+'*.'+extensionFiles
 # Searching files
