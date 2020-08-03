@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from pathlib import Path
 
 from pydrive.auth import GoogleAuth
@@ -35,15 +36,20 @@ if len(sys.argv) < 4:
           '[gdrive folder id]')
 
 pathDirSource = sys.argv[1]  # 'sourceDir'
-extensionFiles = sys.argv[2]  # 'mp4'
+extension_files = sys.argv[2]  # 'mp4'
 id_drive = sys.argv[3]  # 12lp12l4p125k12o215k
+
+now = time.time()
+
+day2seconds = 86400
+two_months = 60
 
 # pathFull = pathDirSource+'/'+'*.'+extensionFiles
 # Searching files
 # files = glob.glob(pathFull)
-files = Path(pathDirSource).glob('**/*.' + extensionFiles)
+files = Path(pathDirSource).glob('**/*.' + extension_files)
 
-print('files:', files)
+# print('files:', files)
 
 # if len(files) < 1:
 #    print("[WARN] Files not found!")
@@ -56,33 +62,39 @@ for f in files:
 
     idParent = id_drive
 
-    fileName = str(f).rsplit('/', 1)[1]
-    print('filename', fileName)
+    file_name = str(f).rsplit('/', 1)[1]
 
-    if extensionFiles == 'txt':
-        openingMode = 'r'
+    if extension_files == 'txt':
+        opening_mode = 'r'
     else:
-        openingMode = 'rb'
+        opening_mode = 'rb'
 
-    print('open', openingMode)
+    # print('opening mode:', opening_mode)
 
-    with open(str(f), openingMode) as file_open:
+    # Continue if modified time is bigger than 2 months
+    if os.stat(f).st_mtime > now - (two_months * day2seconds):
+        print(f, os.stat(f).st_mtime > now - (two_months * day2seconds))
+        continue
+
+    print('filename:', file_name)
+
+    with open(str(f), opening_mode) as file_open:
         try:
-            print(openingMode, fileName)
+            # print(opening_mode, file_name)
             fn = os.path.basename(file_open.name)
-            file_drive = drive.CreateFile({'title': fileName,
+            file_drive = drive.CreateFile({'title': file_name,
                                            'parents': [{"id": id_drive}]})
-            if extensionFiles == 'txt':
+            if extension_files == 'txt':
                 file_drive.SetContentString(file_open.read())
             else:
-                print('f', file_open)
+                # print('f', file_open)
                 file_drive.SetContentFile(str(file_open.name))
             file_drive.Upload()
 
             if file_drive["id"] is not None:
                 print("[OK] The file: " + fn + " has been uploaded.")
                 try:
-                    os.remove(str(f))
+                    os.remove(f)
                     print("[OK] The file: " + fn + " has been removed of the hard disk.")
                 except OSError as error:
                     print(error)
