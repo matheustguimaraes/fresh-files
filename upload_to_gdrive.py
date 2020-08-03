@@ -44,6 +44,8 @@ now = time.time()
 day2seconds = 86400
 two_months = 60
 
+time_limit = now - (two_months * day2seconds)
+
 # pathFull = pathDirSource+'/'+'*.'+extensionFiles
 # Searching files
 # files = glob.glob(pathFull)
@@ -72,11 +74,18 @@ for f in files:
     # print('opening mode:', opening_mode)
 
     # Continue if modified time is bigger than 2 months
-    if os.stat(f).st_mtime > now - (two_months * day2seconds):
-        print(f, os.stat(f).st_mtime > now - (two_months * day2seconds))
+    mod_file_time = os.stat(f).st_mtime
+    mod_days = time.ctime(os.stat(f).st_mtime)
+
+    if mod_file_time > time_limit:
         continue
 
-    print('filename:', file_name)
+    print(f,
+          "| file date:", time.ctime(mod_file_time),
+          "| limit:", time.ctime(time_limit),
+          "| bigger:", mod_file_time > time_limit,
+          )
+    # print('filename:', file_name)
 
     with open(str(f), opening_mode) as file_open:
         try:
