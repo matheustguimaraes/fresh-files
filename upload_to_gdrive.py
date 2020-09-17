@@ -10,26 +10,17 @@ from pydrive.drive import GoogleDrive
 
 while True:
     try:
-        # AM: Login to Google Drive and create drive object
         gauth = GoogleAuth()
-
-        # Automatic autentication
-        # AM: Try to load saved client credentials
         gauth.LoadCredentialsFile("mycreds.txt")
 
         if gauth.credentials is None:
-            # Authenticate if they're not there
             gauth.LocalWebserverAuth()
         elif gauth.access_token_expired:
-            # Refresh them if expired
             gauth.Refresh()
         else:
-            # Initialize the saved creds
             gauth.Authorize()
-        # Save the current credentials to a file
-        gauth.SaveCredentialsFile("mycreds.txt")
 
-        # End Automatic autentication
+        gauth.SaveCredentialsFile("mycreds.txt")
         drive = GoogleDrive(gauth)
         gauth.LocalWebserverAuth()
 
@@ -42,9 +33,9 @@ while True:
                   ' images/ jgp 12lp12l4p')
             break
 
-        pathDirSource = sys.argv[1]  # 'sourceDir'
-        extension_files = sys.argv[2]  # 'mp4'
-        id_drive = sys.argv[3]  # 12lp12l4p125k12o215k
+        pathDirSource = sys.argv[1]
+        extension_files = sys.argv[2]
+        id_drive = sys.argv[3]
 
         now = datetime.date.today()
         two_m_ago = now - relativedelta(months=2)
@@ -63,7 +54,6 @@ while True:
             directories = str(f).rsplit('/', 1)[0].split('/')
             file_name = str(f).rsplit('/', 1)[1]
 
-            # Continue if modified time is bigger than 2 months
             mod_file_time = os.stat(f).st_mtime
             mod_days = time.ctime(os.stat(f).st_mtime)
 
@@ -89,15 +79,15 @@ while True:
 
             fn = os.path.basename(f)
             if file_drive["id"] is not None:
-                print("[INFO] The file: " + fn + " was uploaded.")
+                print("[INFO] Uploaded: " + fn)
                 try:
                     os.remove(f)
-                    print("[INFO] The file: " + fn + " was removed from the hard disk.")
+                    print("[INFO] Removed from disk: " + fn)
                 except OSError as error:
                     print(error)
-                    print("[ERROR] The file: " + fn + " was not removed from the hard disk.")
+                    print("[ERROR] Error, failed to upload due to OS error: " + fn)
             else:
-                print("[ERROR] Upload failed to the file: " + fn + ". drive[id] not found")
+                print("[ERROR] Failed to upload: " + fn)
         break
     except Exception as ex:
         print(ex)
